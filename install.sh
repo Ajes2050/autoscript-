@@ -1,6 +1,6 @@
 #!/bin/bash
 # Falcon panel installer — pulls the license-gated binary from GitHub and runs it.
-#   apt update && apt install -y wget && wget -qO install.sh https://raw.githubusercontent.com/Edutechz0/autoscript/main/install.sh && chmod +x install.sh && ./install.sh
+#   apt update && apt install -y wget && wget -qO install.sh https://raw.githubusercontent.com/Ajes2050/autoscript-/main/install.sh && chmod +x install.sh && ./install.sh
 # The binary itself enforces a node-locked license (REQ code -> activation key).
 
 set -e
