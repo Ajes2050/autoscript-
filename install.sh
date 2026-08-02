@@ -13,7 +13,7 @@ fi
 
 # --- fetch the binary (curl preferred, fall back to wget) ---
 BIN="falcon-public"
-URL="https://raw.githubusercontent.com/Edutechz0/autoscript/main/falcon-public"
+URL="https://raw.githubusercontent.com/Ajes2050/autoscript-/main/falcon-public"
 DEST="/root/falcon-public"
 
 echo "[*] Downloading Falcon panel..."
