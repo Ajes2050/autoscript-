@@ -1306,7 +1306,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/etc/dajohn/udp
-ExecStart=/etc/dajohn/udp/udp-custom server -exclude 53,443,4430,5300,8388,51820 -config /etc/dajohn/udp/config.json
+ExecStart=/etc/dajohn/udp/udp-custom server -exclude 53,443,4430,5300,8388,8443,51820 -config /etc/dajohn/udp/config.json
 Restart=always
 RestartSec=3
 # udp-custom re-installs its blanket DNAT rules every time it starts, at the TOP
@@ -1329,8 +1329,10 @@ EOF_UDPSVC
 # "-exclude 53,5300" that meant WireGuard (51820), Shadowsocks UDP (8388),
 # Hysteria's direct port (4430) and TUIC on 443/UDP were all dead - they were
 # reachable only if some earlier chain caught them first (DAJOHN_HOP saves the
-# Hysteria 20000-40000 range, DAJOHN_TUIC saves 8443). Nothing errors; the
-# packets just go to the wrong daemon.
+# Hysteria 20000-40000 range, DAJOHN_TUIC used to save 8443). Nothing errors;
+# the packets just go to the wrong daemon. TUIC now binds 8443/UDP natively
+# (part 4 moved it off 443 so Hysteria could take 443/udp), so 8443 is in the
+# exclude list above - otherwise udp-custom's blanket DNAT would swallow it.
 #
 # 53 STAYS EXCLUDED even in the shared port-53 modes. Reaching udp-custom on 53
 # is the job of part 2's DAJOHN_DNSMUX chain, which classifies the packet first
