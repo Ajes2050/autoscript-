@@ -1,0 +1,17 @@
+ITZDAJOHN PANEL — install steps
+=======================================
+
+1. Upload this file to your Ubuntu/Debian VPS and log in as root.
+2. chmod +x dajohn-public
+3. sudo ./dajohn-public
+
+On first run it prints a REQUEST CODE, like:
+   REQ-XXXX-XXXX-XXXX-...
+
+4. Send me that Request Code (copy it exactly).
+5. I send back your ACTIVATION KEY (starts with DAJOHN-).
+6. Paste the key at the prompt and press Enter.
+
+The key only works on THIS server — it's tied to that machine, so it
+can't be re-used on another box. After it activates, answer the install
+prompts; when it finishes, type:  menu   to open the control panel.
