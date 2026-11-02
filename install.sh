@@ -15,6 +15,15 @@ fi
 BIN="dajohn-public"
 URL="https://raw.githubusercontent.com/Ajes2050/autoscript-/main/dajohn-public"
 DEST="/root/dajohn-public"
+EXPECTED_SHA256="da57d17ea2464d7bf7e8263ad0951ddb27733408785029c17b5fb7b187413dfd"
+
+case "$(uname -m)" in
+    x86_64|amd64) ;;
+    *)
+        echo "Error: this encrypted installer currently supports x86_64/amd64 only." >&2
+        exit 1
+        ;;
+esac
 
 echo "[*] Downloading Dajohn panel..."
 if command -v curl >/dev/null 2>&1; then
@@ -23,6 +32,12 @@ elif command -v wget >/dev/null 2>&1; then
     wget -qO "$DEST" "$URL"
 else
     echo "Error: need curl or wget" >&2
+    exit 1
+fi
+ACTUAL_SHA256=$(sha256sum "$DEST" | awk '{print $1}')
+if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
+    rm -f -- "$DEST"
+    echo "Error: downloaded installer checksum mismatch; file removed." >&2
     exit 1
 fi
 chmod +x "$DEST"
