@@ -15,7 +15,7 @@ fi
 BIN="dajohn-public"
 URL="https://raw.githubusercontent.com/Ajes2050/autoscript-/main/dajohn-public"
 DEST="/root/dajohn-public"
-EXPECTED_SHA256="25832915408acb40efc5175366364d209ea60cb850c4e0d75c6d1d00a19952dd"
+EXPECTED_SHA256="059f4424d5aa3fdbe9df4c7bca02dc48b577d4b2fe709f7e6874bc19aefe3cb2"
 
 case "$(uname -m)" in
     x86_64|amd64) ;;
