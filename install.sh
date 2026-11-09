@@ -3,8 +3,7 @@
 set -euo pipefail
 umask 077
 
-MANIFEST_URL=https://raw.githubusercontent.com/Ajes2050/autoscript-/main/release.manifest
-SIGNATURE_URL=https://raw.githubusercontent.com/Ajes2050/autoscript-/main/release.manifest.sig
+LATEST_REF_URL=https://raw.githubusercontent.com/Ajes2050/autoscript-/main/release.latest
 DEST=/root/dajohn-public
 TMP=""
 
@@ -45,6 +44,13 @@ for cmd in curl openssl base64 sha256sum stat awk; do command -v "$cmd" >/dev/nu
 
 TMP=$(mktemp -d /tmp/dajohn-bootstrap.XXXXXX) || fail "cannot create temporary directory"
 chmod 700 "$TMP"
+curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 15 --max-time 120 \
+    -H 'Cache-Control: no-cache' -o "$TMP/release.latest" "$LATEST_REF_URL?ts=$(date +%s)"
+RELEASE_REF=$(tr -d '\r\n' < "$TMP/release.latest")
+[[ "$RELEASE_REF" =~ ^v[0-9]+([.][0-9]+){1,3}$ ]] || fail "latest release reference is malformed"
+RELEASE_BASE="https://raw.githubusercontent.com/Ajes2050/autoscript-/$RELEASE_REF"
+MANIFEST_URL="$RELEASE_BASE/release.manifest"
+SIGNATURE_URL="$RELEASE_BASE/release.manifest.sig"
 curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 15 --max-time 120 -o "$TMP/release.manifest" "$MANIFEST_URL"
 curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 15 --max-time 120 -o "$TMP/release.manifest.sig.b64" "$SIGNATURE_URL"
 cat > "$TMP/release-public.pem" <<'EOF_PUB'
@@ -74,11 +80,8 @@ EXPECTED_SIZE=$(manifest_value "${ARCH}_size" "$TMP/release.manifest") || fail "
 [[ "$VERSION" =~ ^[0-9]+([.][0-9]+){1,3}$ ]] || fail "release version is malformed"
 [[ "$EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]] || fail "release checksum is malformed"
 [[ "$EXPECTED_SIZE" =~ ^[0-9]+$ ]] || fail "release size is malformed"
-case "$URL" in
-  https://raw.githubusercontent.com/Ajes2050/autoscript-/main/dajohn-public|\
-  https://raw.githubusercontent.com/Ajes2050/autoscript-/main/dajohn-public-arm64) ;;
-  *) fail "release manifest contains an unapproved URL" ;;
-esac
+[ "$URL" = "$RELEASE_BASE/dajohn-public" ] || [ "$URL" = "$RELEASE_BASE/dajohn-public-arm64" ] \
+    || fail "release manifest contains an unapproved URL"
 
 echo "[*] Downloading signed Dajohn $VERSION for $ARCH..."
 curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 15 --max-time 300 -o "$TMP/dajohn-public" "$URL"
