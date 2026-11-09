@@ -1,0 +1,10 @@
+component=naiveproxy-server
+caddy_version=v2.11.9
+forwardproxy_module=github.com/caddyserver/forwardproxy
+forwardproxy_replacement=github.com/klzgrad/forwardproxy
+forwardproxy_commit=e747854e78743dba85c039b38ed185fb11d93667
+xcaddy_version=v0.4.7
+xcaddy_linux_arm64_sha256=2f24cd0e259761acd906d23dc558fa1855033e77e3c4318467ed59962fb3a02f
+build_flags=CGO_ENABLED=0,-trimpath,-tags=nobadger,nomysql,nopgx
+amd64_sha256=f521190f4f3a864d2e10d34e6122278ca0a99e2179c857453384258f7f87b417
+arm64_sha256=056ebfe9f3f7160fbd8fb1fd981c9bd5136c1b7fc6e4b04c0e1da5e803636728
