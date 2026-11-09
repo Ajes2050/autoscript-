@@ -30,7 +30,6 @@ case "${ID:-}" in
   debian) dpkg --compare-versions "${VERSION_ID:-0}" ge 11 || fail "Debian 11 or newer is required" ;;
   *) fail "supported systems are Ubuntu 20.04+ and Debian 11+ (found ${ID:-unknown})" ;;
 esac
-command -v systemctl >/dev/null 2>&1 || fail "systemd/systemctl is required"
 case "$(uname -m)" in
   x86_64|amd64) ARCH=amd64 ;;
   aarch64|arm64) ARCH=arm64 ;;
@@ -91,6 +90,7 @@ if [ "${DAJOHN_BOOTSTRAP_VERIFY_ONLY:-0}" = 1 ]; then
     echo "[OK] Signed Dajohn $VERSION for $ARCH verified successfully."
     exit 0
 fi
+command -v systemctl >/dev/null 2>&1 || fail "systemd/systemctl is required for installation"
 install -o root -g root -m 700 "$TMP/dajohn-public" "$DEST"
 
 echo "[*] Running Dajohn installer..."
