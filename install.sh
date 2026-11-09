@@ -35,12 +35,12 @@ case "$(uname -m)" in
   *) fail "supported architectures are amd64 and arm64" ;;
 esac
 
-if ! command -v curl >/dev/null 2>&1 || ! command -v openssl >/dev/null 2>&1; then
+if ! command -v curl >/dev/null 2>&1 || ! command -v python3 >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -q
-    apt-get install -y -q ca-certificates curl openssl coreutils
+    apt-get install -y -q ca-certificates curl python3 coreutils
 fi
-for cmd in curl openssl base64 sha256sum stat awk; do command -v "$cmd" >/dev/null 2>&1 || fail "$cmd is required"; done
+for cmd in curl python3 sha256sum stat awk; do command -v "$cmd" >/dev/null 2>&1 || fail "$cmd is required"; done
 
 TMP=$(mktemp -d /tmp/dajohn-bootstrap.XXXXXX) || fail "cannot create temporary directory"
 chmod 700 "$TMP"
@@ -53,15 +53,51 @@ MANIFEST_URL="$RELEASE_BASE/release.manifest"
 SIGNATURE_URL="$RELEASE_BASE/release.manifest.sig"
 curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 15 --max-time 120 -o "$TMP/release.manifest" "$MANIFEST_URL"
 curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 15 --max-time 120 -o "$TMP/release.manifest.sig.b64" "$SIGNATURE_URL"
-cat > "$TMP/release-public.pem" <<'EOF_PUB'
------BEGIN PUBLIC KEY-----
-MCowBQYDK2VwAyEAa7N6UN7g7DxIZKq2ubhOIQeqzGlYxSDB8hKunVjqiAI=
------END PUBLIC KEY-----
-EOF_PUB
-base64 -d "$TMP/release.manifest.sig.b64" > "$TMP/release.sig" 2>/dev/null || fail "release signature encoding is invalid"
-[ "$(stat -c '%s' "$TMP/release.sig")" = 64 ] || fail "release signature length is invalid"
-openssl pkeyutl -verify -pubin -inkey "$TMP/release-public.pem" -rawin \
-    -in "$TMP/release.manifest" -sigfile "$TMP/release.sig" >/dev/null 2>&1 || fail "release signature is invalid"
+python3 - "$TMP/release.manifest" "$TMP/release.manifest.sig.b64" <<'PY_VERIFY' \
+    || fail "release signature is invalid"
+import base64, hashlib, sys
+q = 2**255 - 19
+L = 2**252 + 27742317777372353535851937790883648493
+def inv(x): return pow(x, q - 2, q)
+d = -121665 * inv(121666) % q
+I = pow(2, (q - 1) // 4, q)
+def xrecover(y):
+    xx = (y*y - 1) * inv(d*y*y + 1) % q
+    x = pow(xx, (q + 3) // 8, q)
+    if (x*x - xx) % q: x = x * I % q
+    if x & 1: x = q - x
+    return x
+By = 4 * inv(5) % q
+B = (xrecover(By), By)
+def edwards(P, Q):
+    x1,y1=P; x2,y2=Q
+    return ((x1*y2+x2*y1)*inv(1+d*x1*x2*y1*y2)%q,
+            (y1*y2+x1*x2)*inv(1-d*x1*x2*y1*y2)%q)
+def scalarmult(P, e):
+    if e == 0: return (0,1)
+    Q = scalarmult(P, e//2); Q = edwards(Q,Q)
+    return edwards(Q,P) if e & 1 else Q
+def decodepoint(s):
+    if len(s) != 32: raise ValueError()
+    y = int.from_bytes(s, 'little') & ((1<<255)-1)
+    if y >= q: raise ValueError()
+    x = xrecover(y)
+    if (x & 1) != (s[31] >> 7): x = q-x
+    if (-x*x + y*y - 1 - d*x*x*y*y) % q: raise ValueError()
+    return (x,y)
+def hint(m): return int.from_bytes(hashlib.sha512(m).digest(), 'little')
+try:
+    pub = bytes.fromhex('6bb37a50dee0ec3c4864aab6b9b84e2107aacc6958c520c1f212ae9d58ea8802')
+    msg = open(sys.argv[1], 'rb').read()
+    sig = base64.b64decode(open(sys.argv[2], 'rb').read().strip(), validate=True)
+    if len(sig) != 64: raise ValueError()
+    R=decodepoint(sig[:32]); A=decodepoint(pub); S=int.from_bytes(sig[32:], 'little')
+    if S >= L: raise ValueError()
+    left=scalarmult(B,S); right=edwards(R,scalarmult(A,hint(sig[:32]+pub+msg)))
+    if left != right: raise ValueError()
+except Exception:
+    sys.exit(1)
+PY_VERIFY
 
 manifest_value(){
     local key="$1" path="$2" count value

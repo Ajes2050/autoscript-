@@ -1,8 +1,8 @@
 format=1
-version=5.5.1
-amd64_url=https://raw.githubusercontent.com/Ajes2050/autoscript-/v5.5.1/dajohn-public
-amd64_sha256=bf6bad78c7b7fb15e87ea331eeb86a21a1bb205b98e848b967633c87754dc33a
-amd64_size=3424416
-arm64_url=https://raw.githubusercontent.com/Ajes2050/autoscript-/v5.5.1/dajohn-public-arm64
-arm64_sha256=c5bfede9498f0bc3dddbafd011acca2db6639383de35f97e9c6f2922405e3785
+version=5.5.2
+amd64_url=https://raw.githubusercontent.com/Ajes2050/autoscript-/v5.5.2/dajohn-public
+amd64_sha256=9a7eeed21975590f463049b113dc939ce6ac0a63055a92d30e3f9310b35b0aa0
+amd64_size=3428512
+arm64_url=https://raw.githubusercontent.com/Ajes2050/autoscript-/v5.5.2/dajohn-public-arm64
+arm64_sha256=a185cca86e01ad37552afcdab2f08ac2f34e56b1c7669eb63626a60a60648197
 arm64_size=3342496
