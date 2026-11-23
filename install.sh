@@ -3,7 +3,7 @@
 set -euo pipefail
 umask 077
 
-LATEST_REF_URL=https://raw.githubusercontent.com/Ajes2050/autoscript-/main/release.latest
+LATEST_REF_URL='https://api.github.com/repos/Ajes2050/autoscript-/contents/release.latest?ref=main'
 DEST=/root/dajohn-public
 TMP=""
 
@@ -45,7 +45,8 @@ for cmd in curl python3 sha256sum stat awk; do command -v "$cmd" >/dev/null 2>&1
 TMP=$(mktemp -d /tmp/dajohn-bootstrap.XXXXXX) || fail "cannot create temporary directory"
 chmod 700 "$TMP"
 curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --connect-timeout 15 --max-time 120 \
-    -H 'Cache-Control: no-cache' -o "$TMP/release.latest" "$LATEST_REF_URL?ts=$(date +%s)"
+    -H 'Accept: application/vnd.github.raw+json' -H 'Cache-Control: no-cache' \
+    -o "$TMP/release.latest" "$LATEST_REF_URL"
 RELEASE_REF=$(tr -d '\r\n' < "$TMP/release.latest")
 [[ "$RELEASE_REF" =~ ^v[0-9]+([.][0-9]+){1,3}$ ]] || fail "latest release reference is malformed"
 RELEASE_BASE="https://raw.githubusercontent.com/Ajes2050/autoscript-/$RELEASE_REF"
