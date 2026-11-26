@@ -138,7 +138,7 @@ echo "[*] Running Dajohn installer..."
 echo "    If activation is required, send the REQ code to the owner and paste the returned key."
 exec < /dev/tty
 "$DEST"
-install -d -o root -g root -m 700 /etc/dajohn/core
+mkdir -p -m 700 -- /etc/dajohn/core
 printf '%s\n' "$VERSION" > /etc/dajohn/core/panel_version
 chown root:root /etc/dajohn/core/panel_version
 chmod 600 /etc/dajohn/core/panel_version
