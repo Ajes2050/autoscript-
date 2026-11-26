@@ -110,6 +110,7 @@ manifest_value(){
 }
 
 [ "$(manifest_value format "$TMP/release.manifest")" = 1 ] || fail "unsupported release manifest"
+[ "$(manifest_value channel "$TMP/release.manifest")" = public ] || fail "bootstrap manifest is not the public channel"
 VERSION=$(manifest_value version "$TMP/release.manifest") || fail "release version is missing"
 URL=$(manifest_value "${ARCH}_url" "$TMP/release.manifest") || fail "release URL for $ARCH is missing"
 EXPECTED_SHA256=$(manifest_value "${ARCH}_sha256" "$TMP/release.manifest") || fail "release checksum is missing"
